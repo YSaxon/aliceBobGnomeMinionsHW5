@@ -1,10 +1,12 @@
 package com.company;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.Queue;
 import java.util.concurrent.Semaphore;
 
 public class Door<Type extends Critter> {
-    public ArrayList<Type> OrderOfWaitingAtDoor;
+    public Queue<Type> OrderOfWaitingAtDoor;
 
 
     private volatile int numToWaitFor;
@@ -15,13 +17,13 @@ public class Door<Type extends Critter> {
     public Door(int numToWaitFor) {
         this.numToWaitFor = numToWaitFor;
         weCanGo =new Semaphore(1);
-        OrderOfWaitingAtDoor=new ArrayList<>();
+        OrderOfWaitingAtDoor=new LinkedList<>();
     }
 
     public Door(int numToWaitFor, Semaphore othersToWaitFor) {
         this.numToWaitFor = numToWaitFor;
         this.weCanGo = othersToWaitFor;
-        OrderOfWaitingAtDoor=new ArrayList<>();
+        OrderOfWaitingAtDoor=new LinkedList<>();
     }
 
     public void WaitInLineAtDoor(Type T) {
@@ -43,7 +45,7 @@ public class Door<Type extends Critter> {
 
            // }
                // sout(T, ": " + OrderOfWaitingAtDoor.get(i).name + " will be next");
-        OrderOfWaitingAtDoor.get(0).interrupt();
+        OrderOfWaitingAtDoor.remove().interrupt();
                 try {
                     wait();
                 } catch (InterruptedException e) {
@@ -72,11 +74,11 @@ public class Door<Type extends Critter> {
         } catch (InterruptedException e) {
             goThroughTheDoor(T);
 //            oneAtATimeThroughTheDoor.release();
-            OrderOfWaitingAtDoor.remove(T);//remove0
+            //OrderOfWaitingAtDoor.remove(T);//remove0
 //            if(OrderOfWaitingAtDoor.size()==1){
 //                notify();
 //            }
-            OrderOfWaitingAtDoor.get(0).interrupt();
+            OrderOfWaitingAtDoor.remove().interrupt();
         }}
 
 

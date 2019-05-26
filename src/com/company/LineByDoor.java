@@ -1,28 +1,26 @@
 package com.company;
 
 import java.util.LinkedList;
+import java.util.Optional;
 import java.util.Queue;
 import java.util.concurrent.Semaphore;
 
-public class WaitingAreaByDoor<CritterType extends Critter> {
+public class LineByDoor<CritterType extends Critter> {
     public static final Semaphore GlobalDoor = new Semaphore(0);
     public Queue<CritterType> OrderOfWaitingAtDoor;
 
 
     private volatile int numToWaitFor;
     private final Semaphore weCanGo;
+    private final boolean knockAndWaitForAlice;
     public final Semaphore weHaveGone = new Semaphore(0);
 //    private Semaphore oneAtATimeThroughTheDoor = new Semaphore(1,true);
 
-    public WaitingAreaByDoor(int numToWaitFor) {
-        this.numToWaitFor = numToWaitFor;
-        weCanGo =new Semaphore(1);
-        OrderOfWaitingAtDoor=new LinkedList<>();
-    }
 
-    public WaitingAreaByDoor(int numToWaitFor, Semaphore othersToWaitFor) {
+    public LineByDoor(int numToWaitFor, Semaphore othersToWaitFor, boolean knockAndWaitForAlice) {
         this.numToWaitFor = numToWaitFor;
-        this.weCanGo = othersToWaitFor;
+        this.weCanGo = Optional.ofNullable(othersToWaitFor).orElse(new Semaphore(1));
+        this.knockAndWaitForAlice = knockAndWaitForAlice;
         OrderOfWaitingAtDoor=new LinkedList<>();
     }
 
@@ -45,7 +43,7 @@ public class WaitingAreaByDoor<CritterType extends Critter> {
 
 
             } else {
-                //todo knock on waitingAreaByDoor
+                //todo knock on lineByDoor
                 sout(ThisCritter, " is last of its group to come");
                 //if(weCanGo.availablePermits()<=0)
                 sout(ThisCritter, " is waiting by the door");
@@ -54,16 +52,16 @@ public class WaitingAreaByDoor<CritterType extends Critter> {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
+
+                if(knockAndWaitForAlice){
                 sout(ThisCritter, " is knocking on the door");
                 synchronized (GlobalDoor){
                 GlobalDoor.notify();}
-
-//                Main.Alice.knockOnDoor(GlobalDoor);
                 try {
                     GlobalDoor.acquire();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
-                }
+                }}
 
 
 

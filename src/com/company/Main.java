@@ -17,15 +17,15 @@ public class Main {
 
 
     public static void main(String[] args) {
-        WaitingAreaByDoor minionWaitingAreaByDoor = new WaitingAreaByDoor<Minion>(numMinions);
-        WaitingAreaByDoor gnomeWaitingAreaByDoor = new WaitingAreaByDoor<Gnome>(numGnomes, minionWaitingAreaByDoor.weHaveGone);
+        LineByDoor<Minion> minionLineByDoor = new LineByDoor<Minion>(numMinions,null,true);
+        LineByDoor<Gnome> gnomeLineByDoor = new LineByDoor<Gnome>(numGnomes, minionLineByDoor.weHaveGone,true);
         minions = new Minion[numMinions];
         for (int i = 0; i < minions.length; i++) {
-            minions[i]=new Minion("minion"+i, minionWaitingAreaByDoor);
+            minions[i]=new Minion("minion"+i, minionLineByDoor);
         }
         gnomes = new Gnome[numGnomes];
         for (int i = 0; i < gnomes.length; i++) {
-            gnomes[i]=new Gnome("\tgnome"+i, gnomeWaitingAreaByDoor);
+            gnomes[i]=new Gnome("\tgnome"+i, gnomeLineByDoor);
         }
         for (Gnome gnome : gnomes) {
             gnome.start();
@@ -33,7 +33,7 @@ public class Main {
         for (Minion minion : minions) {
             minion.start();
         }
-        bob = new Bob(BobSleeping, gnomeWaitingAreaByDoor.weHaveGone);
+        bob = new Bob(BobSleeping, gnomeLineByDoor.weHaveGone);
         bob.start();
         alice = new Alice(gnomes,minions,bob);
         alice.start();
@@ -42,7 +42,7 @@ public class Main {
     static class Bob extends Critter {
 
         public Bob(Object bobSleeping, Semaphore bobCanComeIn) {
-            super("\t\tbob", new WaitingAreaByDoor<Bob>(1,bobCanComeIn));
+            super("\t\tbob", new LineByDoor<Bob>(1,bobCanComeIn,false), "accounting firm");
         }
 
         @Override
@@ -57,9 +57,14 @@ public class Main {
             LeaveForWork();
         }
 
+        @Override
+        protected void PartingWordsToAlice() {
+            //none
+        }
+
 
         public void ComeHome() {
-            waitingAreaByDoor.WaitInLineAtDoor(this);
+            lineByDoor.WaitInLineAtDoor(this);
         }
     }
     static class Alice extends Thread {
@@ -73,7 +78,7 @@ public class Main {
             Alice.gnomes =gnomes;
             Alice.minions =minions;
             this.bob = bob;
-            this.doorToWaitBy = WaitingAreaByDoor.GlobalDoor;
+            this.doorToWaitBy = LineByDoor.GlobalDoor;
             critterList.addAll(Arrays.asList(minions));
             critterList.addAll(Arrays.asList(gnomes));
         }
@@ -109,9 +114,12 @@ public class Main {
 
         private void makeLunchAndKissEachOne() {
             for (Critter critter : critterList) {
-                //critter.ReceiveLunchAndKiss();
-                //critter.LeaveForWork();
-                critter.interrupt();
+                synchronized (critter){
+                    System.out.println("alice making lunch for "+critter.name);
+                    System.out.println("alice giving "+critter.name+" a kiss");
+                    critter.notify();
+                    //critter.ReceiveLunchAndKiss();
+                }
             }
         }
     }

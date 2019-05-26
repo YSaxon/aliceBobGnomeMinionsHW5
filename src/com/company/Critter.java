@@ -3,6 +3,17 @@ package com.company;
 public abstract class Critter extends Thread{
 
 
+    //    public static ReentrantLock WaitToKnockOnDoor = new ReentrantLock(true);
+    //    public static Queue<Minion> OrderOfWaitingAtDoor = new LinkedList<>();
+    //    public Semaphore door=new Semaphore(-1,true);
+    protected Door<Critter> door;
+    public String name;
+
+    public Critter(String name, Door door) {
+        this.name=name;
+        this.door = door;
+    }
+
     @Override
     public void run() {
         super.run();
@@ -15,9 +26,9 @@ public abstract class Critter extends Thread{
 
     }
 
-    public String name;
+
     public void ReceiveLunchAndKiss(){
-        System.out.println(name + " getting a lunch and a kiss");
+      //  System.out.println(name + " getting a lunch and a kiss");
     }
 
     public void LeaveForWork() {
@@ -31,6 +42,8 @@ public abstract class Critter extends Thread{
         ComeHome();
     }
 
-    protected abstract void ComeHome();
+    public void ComeHome() {
+        door.WaitInLineAtDoor(this);
+    }
 
 }

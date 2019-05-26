@@ -43,14 +43,8 @@ public class Main {
         }
     static class Bob extends Critter {
 
-        //    public static ReentrantLock WaitToKnockOnDoor = new ReentrantLock(true);
-        //    public static Queue<Minion> OrderOfWaitingAtDoor = new LinkedList<>();
-        //    public Semaphore door=new Semaphore(-1,true);
-        public static Door<Bob> door;
-
         public Bob(Object bobSleeping, Semaphore bobCanComeIn) {
-            name="\t\tbob";
-            door=new Door<Bob>(1,bobCanComeIn);
+            super("\t\tbob", new Door<Bob>(1,bobCanComeIn));
         }
 
         @Override

@@ -29,57 +29,56 @@ public class Door<Type extends Critter> {
     public void WaitInLineAtDoor(Type T) {
         synchronized (this){
         OrderOfWaitingAtDoor.add(T);
-        if(OrderOfWaitingAtDoor.size()==numToWaitFor){
-            //todo knock on door
-
-            sout(T, " is last to come");
-            sout(T, " is waiting by the door");
+            if (OrderOfWaitingAtDoor.size() != numToWaitFor) {
+            //all other than the last one
             try {
-                weCanGo.acquire();
+                sout(T, " is waiting by the door");
+                wait();
             } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            sout(T, " is knocking on door");
-           // for (int i = OrderOfWaitingAtDoor.size() - 2; i >= 0; i--) {
-           // for (int i = 0; i < OrderOfWaitingAtDoor.size(); i++) {
+                goThroughTheDoor(T);
+    //            oneAtATimeThroughTheDoor.release();
+                //OrderOfWaitingAtDoor.remove(T);//remove0
+    //            if(OrderOfWaitingAtDoor.size()==1){
+    //                notify();
+    //            }
+                OrderOfWaitingAtDoor.remove().interrupt();
+            }} else {
+                //todo knock on door
 
-           // }
-               // sout(T, ": " + OrderOfWaitingAtDoor.get(i).name + " will be next");
-        OrderOfWaitingAtDoor.remove().interrupt();
+                sout(T, " is last to come");
+                sout(T, " is waiting by the door");
                 try {
-                    wait();
+                    weCanGo.acquire();
                 } catch (InterruptedException e) {
-                   // e.printStackTrace();
+                    e.printStackTrace();
                 }
-                //   }
+                sout(T, " is knocking on door");
+               // for (int i = OrderOfWaitingAtDoor.size() - 2; i >= 0; i--) {
+               // for (int i = 0; i < OrderOfWaitingAtDoor.size(); i++) {
 
-
-            //last guy
-//            try {
-//                wait();
-//            } catch (InterruptedException e) {
-//                e.printStackTrace();
-//            }
-            goThroughTheDoor(T);
-            sout(T, " is going to release the lock");
-            weHaveGone.release();
-
-
-        }
-        else{
-        //all other than the last one
-        try {
-            sout(T, " is waiting by the door");
-            wait();
-        } catch (InterruptedException e) {
-            goThroughTheDoor(T);
-//            oneAtATimeThroughTheDoor.release();
-            //OrderOfWaitingAtDoor.remove(T);//remove0
-//            if(OrderOfWaitingAtDoor.size()==1){
-//                notify();
-//            }
+               // }
+                   // sout(T, ": " + OrderOfWaitingAtDoor.get(i).name + " will be next");
             OrderOfWaitingAtDoor.remove().interrupt();
-        }}
+                    try {
+                        wait();
+                    } catch (InterruptedException e) {
+                       // e.printStackTrace();
+                    }
+                    //   }
+
+
+                //last guy
+    //            try {
+    //                wait();
+    //            } catch (InterruptedException e) {
+    //                e.printStackTrace();
+    //            }
+                goThroughTheDoor(T);
+                sout(T, " is going to release the lock");
+                weHaveGone.release();
+
+
+            }
 
 
         }

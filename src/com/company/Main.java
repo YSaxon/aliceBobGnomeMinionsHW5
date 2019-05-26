@@ -35,13 +35,18 @@ public class Main {
             gnomes[i]=new Gnome("\tgnome"+i,gnomeDoor);
         }
         for (Gnome gnome : gnomes) {
-          //  gnome.start();
+           gnome.start();
         }
         for (Minion minion : minions) {
             minion.start();
         }
         }
     static class Bob extends Critter {
+
+        //    public static ReentrantLock WaitToKnockOnDoor = new ReentrantLock(true);
+        //    public static Queue<Minion> OrderOfWaitingAtDoor = new LinkedList<>();
+        //    public Semaphore door=new Semaphore(-1,true);
+            public static Door door;
 
         public Bob(Object bobSleeping) {
             name="bob";
@@ -67,7 +72,6 @@ public class Main {
 
         }
 
-        @Override
         public void ComeHome() {
 
         }

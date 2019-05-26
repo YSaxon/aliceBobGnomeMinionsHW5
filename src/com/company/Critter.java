@@ -3,11 +3,6 @@ package com.company;
 public abstract class Critter extends Thread{
 
 
-    //    public static ReentrantLock WaitToKnockOnDoor = new ReentrantLock(true);
-    //    public static Queue<Minion> OrderOfWaitingAtDoor = new LinkedList<>();
-    //    public Semaphore door=new Semaphore(-1,true);
-        public static Door door;
-
     @Override
     public void run() {
         super.run();
@@ -36,7 +31,6 @@ public abstract class Critter extends Thread{
         ComeHome();
     }
 
-    public void ComeHome() {
-        door.WaitInLineAtDoor(this);
-    }
+    protected abstract void ComeHome();
+
 }

@@ -8,8 +8,8 @@ public class Door<Type extends Critter> {
 
 
     private volatile int numToWaitFor;
-    private Semaphore weCanGo;
-    public Semaphore weHaveGone = new Semaphore(-1);
+    private final Semaphore weCanGo;
+    public final Semaphore weHaveGone = new Semaphore(0);
 //    private Semaphore oneAtATimeThroughTheDoor = new Semaphore(1,true);
 
     public Door(int numToWaitFor) {
@@ -25,7 +25,7 @@ public class Door<Type extends Critter> {
     }
 
     public void WaitInLineAtDoor(Type T) {
-        synchronized (weCanGo){
+        synchronized (this){
         OrderOfWaitingAtDoor.add(T);
         if(OrderOfWaitingAtDoor.size()==numToWaitFor){
             //todo knock on door
@@ -47,7 +47,7 @@ public class Door<Type extends Critter> {
                 try {
                     wait();
                 } catch (InterruptedException e) {
-                    e.printStackTrace();
+                   // e.printStackTrace();
                 }
                 //   }
 

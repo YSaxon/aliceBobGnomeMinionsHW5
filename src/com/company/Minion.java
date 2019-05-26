@@ -2,8 +2,8 @@ package com.company;
 
 public class Minion extends Critter {
 
-    public Minion(String s, Door<Minion> door) {
-        super(s,door);
+    public Minion(String s, WaitingAreaByDoor<Minion> waitingAreaByDoor) {
+        super(s, waitingAreaByDoor);
     }
 
 }

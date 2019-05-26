@@ -4,7 +4,8 @@ import java.util.LinkedList;
 import java.util.Queue;
 import java.util.concurrent.Semaphore;
 
-public class Door<CritterType extends Critter> {
+public class WaitingAreaByDoor<CritterType extends Critter> {
+    public static final Semaphore GlobalDoor = new Semaphore(0);
     public Queue<CritterType> OrderOfWaitingAtDoor;
 
 
@@ -13,13 +14,13 @@ public class Door<CritterType extends Critter> {
     public final Semaphore weHaveGone = new Semaphore(0);
 //    private Semaphore oneAtATimeThroughTheDoor = new Semaphore(1,true);
 
-    public Door(int numToWaitFor) {
+    public WaitingAreaByDoor(int numToWaitFor) {
         this.numToWaitFor = numToWaitFor;
         weCanGo =new Semaphore(1);
         OrderOfWaitingAtDoor=new LinkedList<>();
     }
 
-    public Door(int numToWaitFor, Semaphore othersToWaitFor) {
+    public WaitingAreaByDoor(int numToWaitFor, Semaphore othersToWaitFor) {
         this.numToWaitFor = numToWaitFor;
         this.weCanGo = othersToWaitFor;
         OrderOfWaitingAtDoor=new LinkedList<>();
@@ -44,15 +45,28 @@ public class Door<CritterType extends Critter> {
 
 
             } else {
-                //todo knock on door
-                sout(ThisCritter, " is last to come");
+                //todo knock on waitingAreaByDoor
+                sout(ThisCritter, " is last of its group to come");
+                //if(weCanGo.availablePermits()<=0)
                 sout(ThisCritter, " is waiting by the door");
                 try {
                     weCanGo.acquire();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                sout(ThisCritter, " is knocking on door");
+                sout(ThisCritter, " is knocking on the door");
+                synchronized (GlobalDoor){
+                GlobalDoor.notify();}
+
+//                Main.Alice.knockOnDoor(GlobalDoor);
+                try {
+                    GlobalDoor.acquire();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+
+
                 notifyAll();
                 try {
                         while((OrderOfWaitingAtDoor.peek()!=ThisCritter)){
@@ -62,7 +76,7 @@ public class Door<CritterType extends Critter> {
                     }
                 goThroughTheDoor(ThisCritter);
                 OrderOfWaitingAtDoor.remove(ThisCritter);
-                sout(ThisCritter, " is going to release the lock");
+                sout(ThisCritter, "is last one of its group through the door. Any groups waiting on them can now go");
                 weHaveGone.release();
             }
 
@@ -71,13 +85,14 @@ public class Door<CritterType extends Critter> {
     }
 
     private void goThroughTheDoor(CritterType T) {
+        synchronized (GlobalDoor){
         sout(T, " is going though the door");
         try {
             Thread.sleep(20);
         } catch (InterruptedException e1) {
             e1.printStackTrace();
         }
-        sout(T, " has made it though the door");
+        sout(T, " has made it though the door");}
     }
 
     private void sout(CritterType T, String s) {

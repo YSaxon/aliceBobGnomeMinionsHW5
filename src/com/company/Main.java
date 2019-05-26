@@ -17,15 +17,15 @@ public class Main {
 
 
     public static void main(String[] args) {
-        Door minionDoor = new Door<Minion>(numMinions);
-        Door gnomeDoor = new Door<Gnome>(numGnomes,minionDoor.weHaveGone);
+        WaitingAreaByDoor minionWaitingAreaByDoor = new WaitingAreaByDoor<Minion>(numMinions);
+        WaitingAreaByDoor gnomeWaitingAreaByDoor = new WaitingAreaByDoor<Gnome>(numGnomes, minionWaitingAreaByDoor.weHaveGone);
         minions = new Minion[numMinions];
         for (int i = 0; i < minions.length; i++) {
-            minions[i]=new Minion("minion"+i,minionDoor);
+            minions[i]=new Minion("minion"+i, minionWaitingAreaByDoor);
         }
         gnomes = new Gnome[numGnomes];
         for (int i = 0; i < gnomes.length; i++) {
-            gnomes[i]=new Gnome("\tgnome"+i,gnomeDoor);
+            gnomes[i]=new Gnome("\tgnome"+i, gnomeWaitingAreaByDoor);
         }
         for (Gnome gnome : gnomes) {
             gnome.start();
@@ -33,66 +33,78 @@ public class Main {
         for (Minion minion : minions) {
             minion.start();
         }
-        bob = new Bob(BobSleeping,gnomeDoor.weHaveGone);
+        bob = new Bob(BobSleeping, gnomeWaitingAreaByDoor.weHaveGone);
+        bob.start();
         alice = new Alice(gnomes,minions,bob);
         alice.start();
     }
 
-    private static void CreateMunchkins() {
-
-        }
     static class Bob extends Critter {
 
         public Bob(Object bobSleeping, Semaphore bobCanComeIn) {
-            super("\t\tbob", new Door<Bob>(1,bobCanComeIn));
+            super("\t\tbob", new WaitingAreaByDoor<Bob>(1,bobCanComeIn));
         }
 
         @Override
         public void run() {
+            System.out.println("bob starting");
             super.run();
             try {
-                Thread.sleep(-1);
+                Thread.sleep(99999);
             } catch (InterruptedException e) {
                 System.out.println("Bob has woken up");
             }
             LeaveForWork();
         }
 
-        @Override
-        public void ReceiveLunchAndKiss() {
-
-        }
 
         public void ComeHome() {
-            door.WaitInLineAtDoor(this);
+            waitingAreaByDoor.WaitInLineAtDoor(this);
         }
     }
     static class Alice extends Thread {
         private static Gnome[] gnomes;
         private static Minion[] minions;
         private Bob bob;
+        private final Semaphore doorToWaitBy;
         private List<Critter> critterList=new ArrayList<>();
 
         public Alice(Gnome[] gnomes, Minion[] minions, Bob bob) {
             Alice.gnomes =gnomes;
             Alice.minions =minions;
             this.bob = bob;
+            this.doorToWaitBy = WaitingAreaByDoor.GlobalDoor;
             critterList.addAll(Arrays.asList(minions));
             critterList.addAll(Arrays.asList(gnomes));
         }
 
-        public static void knockOnDoor(Semaphore door) {
-            System.out.println("door was knocked on and Alice is opening it");
-            door.release();
-        }
+//        public void knockOnDoor(Semaphore door) {
+//            System.out.println("door was knocked on and Alice is opening it");
+//            door.release();
+//        }
+
 
         @Override
         public void run() {
             super.run();
             makeLunchAndKissEachOne();
-            bob.interrupt();
-            bob.ReceiveLunchAndKiss();
-            bob.LeaveForWork();
+            //wakeBob();
+            waitByDoor();
+            //bob.interrupt();
+        }
+
+        private void waitByDoor() {
+            for (int i = 0; i < 2; i++) {
+            synchronized (doorToWaitBy){
+                try {
+                    System.out.println("alice is waiting by door for a knock");
+                    doorToWaitBy.wait();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                System.out.println("alice heard the knock and is opening the door");
+                doorToWaitBy.release();
+            }}
         }
 
         private void makeLunchAndKissEachOne() {

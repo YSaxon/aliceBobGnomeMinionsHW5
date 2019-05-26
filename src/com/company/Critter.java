@@ -5,13 +5,13 @@ public abstract class Critter extends Thread{
 
     //    public static ReentrantLock WaitToKnockOnDoor = new ReentrantLock(true);
     //    public static Queue<Minion> OrderOfWaitingAtDoor = new LinkedList<>();
-    //    public Semaphore door=new Semaphore(-1,true);
-    protected Door<Critter> door;
+    //    public Semaphore waitingAreaByDoor=new Semaphore(-1,true);
+    protected WaitingAreaByDoor<Critter> waitingAreaByDoor;
     public String name;
 
-    public Critter(String name, Door door) {
+    public Critter(String name, WaitingAreaByDoor waitingAreaByDoor) {
         this.name=name;
-        this.door = door;
+        this.waitingAreaByDoor = waitingAreaByDoor;
     }
 
     @Override
@@ -28,7 +28,7 @@ public abstract class Critter extends Thread{
 
 
     public void ReceiveLunchAndKiss(){
-      //  System.out.println(name + " getting a lunch and a kiss");
+        System.out.println(name + " getting a lunch and a kiss");
     }
 
     public void LeaveForWork() {
@@ -38,12 +38,12 @@ public abstract class Critter extends Thread{
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-       // System.out.println(name+" done working");
+        System.out.println(name+" done working");
         ComeHome();
     }
 
     public void ComeHome() {
-        door.WaitInLineAtDoor(this);
+        waitingAreaByDoor.WaitInLineAtDoor(this);
     }
 
 }

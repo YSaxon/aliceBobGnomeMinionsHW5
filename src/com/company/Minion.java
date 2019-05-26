@@ -11,13 +11,6 @@ public class Minion extends Critter {
         this.door = door;
     }
 
-
-    @Override
-    public void ReceiveLunchAndKiss() {
-
-
-    }
-
     public void ComeHome() {
         door.WaitInLineAtDoor(this);
     }

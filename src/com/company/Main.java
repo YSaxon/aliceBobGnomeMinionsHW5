@@ -17,13 +17,6 @@ public class Main {
 
 
     public static void main(String[] args) {
-        CreateMunchkins();
-        bob = new Bob(BobSleeping);
-        alice = new Alice(gnomes,minions,bob);
-        alice.start();
-    }
-
-    private static void CreateMunchkins() {
         Door minionDoor = new Door<Minion>(numMinions);
         Door gnomeDoor = new Door<Gnome>(numGnomes,minionDoor.weHaveGone);
         minions = new Minion[numMinions];
@@ -35,21 +28,29 @@ public class Main {
             gnomes[i]=new Gnome("\tgnome"+i,gnomeDoor);
         }
         for (Gnome gnome : gnomes) {
-           gnome.start();
+            gnome.start();
         }
         for (Minion minion : minions) {
             minion.start();
         }
+        bob = new Bob(BobSleeping,gnomeDoor.weHaveGone);
+        alice = new Alice(gnomes,minions,bob);
+        alice.start();
+    }
+
+    private static void CreateMunchkins() {
+
         }
     static class Bob extends Critter {
 
         //    public static ReentrantLock WaitToKnockOnDoor = new ReentrantLock(true);
         //    public static Queue<Minion> OrderOfWaitingAtDoor = new LinkedList<>();
         //    public Semaphore door=new Semaphore(-1,true);
-            public static Door door;
+        public static Door<Bob> door;
 
-        public Bob(Object bobSleeping) {
-            name="bob";
+        public Bob(Object bobSleeping, Semaphore bobCanComeIn) {
+            name="\t\tbob";
+            door=new Door<Bob>(1,bobCanComeIn);
         }
 
         @Override
@@ -60,6 +61,7 @@ public class Main {
             } catch (InterruptedException e) {
                 System.out.println("Bob has woken up");
             }
+            LeaveForWork();
         }
 
         @Override
@@ -67,13 +69,8 @@ public class Main {
 
         }
 
-        @Override
-        public void LeaveForWork() {
-
-        }
-
         public void ComeHome() {
-
+            door.WaitInLineAtDoor(this);
         }
     }
     static class Alice extends Thread {

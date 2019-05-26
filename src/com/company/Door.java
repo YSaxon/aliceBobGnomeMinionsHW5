@@ -1,12 +1,11 @@
 package com.company;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.concurrent.Semaphore;
 
-public class Door<Type extends Critter> {
-    public Queue<Type> OrderOfWaitingAtDoor;
+public class Door<CritterType extends Critter> {
+    public Queue<CritterType> OrderOfWaitingAtDoor;
 
 
     private volatile int numToWaitFor;
@@ -26,65 +25,52 @@ public class Door<Type extends Critter> {
         OrderOfWaitingAtDoor=new LinkedList<>();
     }
 
-    public void WaitInLineAtDoor(Type T) {
+    public void WaitInLineAtDoor(CritterType ThisCritter) {
         synchronized (this){
-        OrderOfWaitingAtDoor.add(T);
-            if (OrderOfWaitingAtDoor.size() != numToWaitFor) {
-            //all other than the last one
+        OrderOfWaitingAtDoor.add(ThisCritter);
+            if (OrderOfWaitingAtDoor.size() != numToWaitFor) {//if not last to come
             try {
-                sout(T, " is waiting by the door");
-                wait();
-            } catch (InterruptedException e) {
-                goThroughTheDoor(T);
-    //            oneAtATimeThroughTheDoor.release();
-                //OrderOfWaitingAtDoor.remove(T);//remove0
-    //            if(OrderOfWaitingAtDoor.size()==1){
-    //                notify();
-    //            }
-                OrderOfWaitingAtDoor.remove().interrupt();
-            }} else {
-                //todo knock on door
+                sout(ThisCritter, " is waiting by the door");
+                    do {//wait until last one comes
+                        wait();
+                    } while ((OrderOfWaitingAtDoor.peek() != ThisCritter));//and wait again on wake if you aren't next in line
 
-                sout(T, " is last to come");
-                sout(T, " is waiting by the door");
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+                goThroughTheDoor(ThisCritter);
+                OrderOfWaitingAtDoor.remove(ThisCritter);
+                notifyAll();
+
+
+            } else {
+                //todo knock on door
+                sout(ThisCritter, " is last to come");
+                sout(ThisCritter, " is waiting by the door");
                 try {
                     weCanGo.acquire();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                sout(T, " is knocking on door");
-               // for (int i = OrderOfWaitingAtDoor.size() - 2; i >= 0; i--) {
-               // for (int i = 0; i < OrderOfWaitingAtDoor.size(); i++) {
-
-               // }
-                   // sout(T, ": " + OrderOfWaitingAtDoor.get(i).name + " will be next");
-            OrderOfWaitingAtDoor.remove().interrupt();
-                    try {
-                        wait();
-                    } catch (InterruptedException e) {
+                sout(ThisCritter, " is knocking on door");
+                notifyAll();
+                try {
+                        while((OrderOfWaitingAtDoor.peek()!=ThisCritter)){
+                            wait();}
+                } catch (InterruptedException e) {
                        // e.printStackTrace();
                     }
-                    //   }
-
-
-                //last guy
-    //            try {
-    //                wait();
-    //            } catch (InterruptedException e) {
-    //                e.printStackTrace();
-    //            }
-                goThroughTheDoor(T);
-                sout(T, " is going to release the lock");
+                goThroughTheDoor(ThisCritter);
+                OrderOfWaitingAtDoor.remove(ThisCritter);
+                sout(ThisCritter, " is going to release the lock");
                 weHaveGone.release();
-
-
             }
 
 
         }
     }
 
-    private void goThroughTheDoor(Type T) {
+    private void goThroughTheDoor(CritterType T) {
         sout(T, " is going though the door");
         try {
             Thread.sleep(20);
@@ -94,7 +80,7 @@ public class Door<Type extends Critter> {
         sout(T, " has made it though the door");
     }
 
-    private void sout(Type T, String s) {
+    private void sout(CritterType T, String s) {
         System.out.println(T.name + s);
     }
 }

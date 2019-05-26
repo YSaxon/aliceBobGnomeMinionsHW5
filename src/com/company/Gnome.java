@@ -13,11 +13,6 @@ public class Gnome extends Critter implements Runnable {
         name=s;
     }
 
-    @Override
-    public void ReceiveLunchAndKiss() {
-
-    }
-
     public void ComeHome() {
         door.WaitInLineAtDoor(this);
     }

@@ -27,7 +27,7 @@ public abstract class Critter extends Thread{
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        System.out.println(name+" done working");
+       // System.out.println(name+" done working");
         ComeHome();
     }
 

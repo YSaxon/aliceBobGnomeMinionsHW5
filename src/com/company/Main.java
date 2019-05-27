@@ -11,7 +11,7 @@ public class Main {
     public static final int numGnomes = 7;
     private static Gnome[] gnomes;
     private static Minion[] minions;
-    private static Alice alice;
+    public static Alice alice;
     public static Object BobSleeping = new Object();
     private static Bob bob;
 
@@ -42,19 +42,20 @@ public class Main {
     static class Bob extends Critter {
 
         public Bob(Object bobSleeping, Semaphore bobCanComeIn) {
-            super("\t\tbob", new LineByDoor<Bob>(1,bobCanComeIn,false), "accounting firm");
+            super("\t\tbob", new LineByDoor<Bob>(1,bobCanComeIn,false), "accounting firm", new GroupByGroup(true,1,()-> {}));
         }
 
         @Override
         public void run() {
-            System.out.println("bob starting");
-            super.run();
+            //System.out.println("bob starting");
             try {
-                Thread.sleep(99999);
+                System.out.println("bob is sleeping");
+                sleep(9999999);
             } catch (InterruptedException e) {
                 System.out.println("Bob has woken up");
             }
-            LeaveForWork();
+            super.run();
+            System.out.println("bob after super.run");
         }
 
         @Override
@@ -63,10 +64,18 @@ public class Main {
         }
 
 
+
         public void ComeHome() {
             lineByDoor.WaitInLineAtDoor(this);
         }
     }
+
+    static class Coordination{
+        public static volatile int GnomesLeft;
+        public static volatile int MinionsLeft;
+        public static Semaphore MinionsHaveGone= new Semaphore(0);
+    }
+
     static class Alice extends Thread {
         private static Gnome[] gnomes;
         private static Minion[] minions;
@@ -93,9 +102,26 @@ public class Main {
         public void run() {
             super.run();
             makeLunchAndKissEachOne();
-            //wakeBob();
+            wakeBobWhenMinionsAreGone();
             waitByDoor();
-            //bob.interrupt();
+        }
+
+        private void wakeBobWhenMinionsAreGone() {
+
+            try {
+                Coordination.MinionsHaveGone.acquire();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            System.out.println("alice is waking bob up");
+            bob.interrupt();
+//            try {
+                //sleep(10);//cheap workaround
+//            } catch (InterruptedException e) {
+//                e.printStackTrace();
+//            }
+            makeLunchKissAndNotify(bob);
+
         }
 
         private void waitByDoor() {
@@ -114,14 +140,25 @@ public class Main {
 
         private void makeLunchAndKissEachOne() {
             for (Critter critter : critterList) {
-                synchronized (critter){
-                    System.out.println("alice making lunch for "+critter.name);
-                    System.out.println("alice giving "+critter.name+" a kiss");
-                    critter.notify();
-                    //critter.ReceiveLunchAndKiss();
-                }
+                makeLunchKissAndNotify(critter);
             }
         }
+
+        private void makeLunchKissAndNotify(Critter critter) {
+            while(!critter.readyForAliceInTheMorning);
+            synchronized (critter){
+//                try {
+//                    wait();
+//                } catch (InterruptedException e) {
+//                    e.printStackTrace();
+//                }
+
+                System.out.println("alice making lunch for "+ critter.name);
+                System.out.println("alice giving "+ critter.name+" a kiss");
+                critter.notify();
+            }
+        }
+
     }
     }
 

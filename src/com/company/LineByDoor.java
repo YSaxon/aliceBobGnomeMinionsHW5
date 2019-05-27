@@ -43,9 +43,7 @@ public class LineByDoor<CritterType extends Critter> {
 
 
             } else {
-                //todo knock on lineByDoor
                 sout(ThisCritter, " is last of its group to come");
-                //if(weCanGo.availablePermits()<=0)
                 sout(ThisCritter, " is waiting by the door");
                 try {
                     weCanGo.acquire();

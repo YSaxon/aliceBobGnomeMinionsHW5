@@ -8,12 +8,15 @@ public abstract class Critter extends Thread{
     //    public Semaphore lineByDoor=new Semaphore(-1,true);
     protected LineByDoor<Critter> lineByDoor;
     public String name;
+    public final GroupByGroup groupByGroup;
     private String workplace;
+    public boolean readyForAliceInTheMorning;
 
-    public Critter(String name, LineByDoor lineByDoor, String workplace) {
+    public Critter(String name, LineByDoor lineByDoor, String workplace, GroupByGroup groupByGroup) {
         this.name=name;
         this.lineByDoor = lineByDoor;
         this.workplace = workplace;
+        this.groupByGroup = groupByGroup;
     }
 
     @Override
@@ -21,8 +24,9 @@ public abstract class Critter extends Thread{
         super.run();
         try {
             synchronized (this){
-//            sleep(999999);
-            wait();}
+                readyForAliceInTheMorning=true;
+                wait();//wait for alice to make them lunch
+            }
         } catch (InterruptedException e) {
            e.printStackTrace();
         }
@@ -41,12 +45,15 @@ public abstract class Critter extends Thread{
     protected abstract void PartingWordsToAlice();
 
     public void LeaveForWork() {
-        synchronized (LineByDoor.GlobalDoor){
-        System.out.println(name+"is leaving through the door and going to work");}
+        groupByGroup.GoSingleFileWhenLegal(
+                ()-> System.out.println(name+" is leaving")
+        );
+        //System.out.println(name+"is leaving through the door and going to work");
         Work();
         System.out.println(name+" done working");
         ComeHome();
     }
+
 
     protected void Work(){
         try {

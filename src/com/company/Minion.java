@@ -2,8 +2,9 @@ package com.company;
 
 public class Minion extends Critter {
 
+    public static GroupByGroup groupByGroup = new GroupByGroup(true,Main.numMinions,Gnome.groupByGroup::AllowGroupToGo);
     public Minion(String s, LineByDoor<Minion> lineByDoor) {
-        super(s, lineByDoor, "deli");
+        super(s, lineByDoor, "deli", groupByGroup);
     }
 
     @Override
@@ -12,4 +13,6 @@ public class Minion extends Critter {
             System.out.println(name + " says to alice \"Thank you alice\"");
 
     }
+
+
 }

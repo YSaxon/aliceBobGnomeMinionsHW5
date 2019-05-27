@@ -1,16 +1,10 @@
 package com.company;
 
-import static com.company.Main.Coordination.WaitForBobForDinner;
-import static com.company.Main.Coordination.waitingForBob;
+import static com.company.Main.Coordination.*;
 
-public abstract class Critter extends Thread{
+public abstract class Critter extends NamedThread{
 
-
-    //    public static ReentrantLock WaitToKnockOnDoor = new ReentrantLock(true);
-    //    public static Queue<Minion> OrderOfWaitingAtDoor = new LinkedList<>();
-    //    public Semaphore lineByDoor=new Semaphore(-1,true);
-    protected LineByDoor<Critter> lineByDoor;
-    public String name;
+ protected LineByDoor<Critter> lineByDoor;
     public final GroupByGroup groupByGroup;
     private String workplace;
     public boolean readyForAliceInTheMorning;
@@ -41,15 +35,15 @@ public abstract class Critter extends Thread{
         System.out.println(name+" done working");
         ComeHome();
         Main.Coordination.WaitForBobForDinner(this);
-
+        Main.Coordination.WaitForDinnerToBeReady(this);
+        GetSomeDinner(this);
+        BeforeBed();
+        Main.Coordination.GoToBed(this);
     }
 
-
-    public void ReceiveLunchAndKiss(){
-//        System.out.println(name + " got a lunch and a kiss");
-//        PartingWordsToAlice();
-//        LeaveForWork();
+    public void BeforeBed() {
     }
+
 
     protected abstract void PartingWordsToAlice();
 

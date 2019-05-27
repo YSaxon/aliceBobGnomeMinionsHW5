@@ -1,10 +1,9 @@
 package com.company;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.Semaphore;
 
+import static com.company.Main.Coordination.*;
 import static com.company.Main.Coordination.WaitForBobForDinner;
 import static com.company.Main.Coordination.waitingForDinnerToBeReady;
 
@@ -66,7 +65,10 @@ public class Main {
             //none
         }
 
-
+        @Override
+         public void BeforeBed() {
+            GoReadABook(this);
+        }
 
         public void ComeHome() {
             lineByDoor.WaitInLineAtDoor(this);
@@ -79,6 +81,10 @@ public class Main {
         public static Semaphore MinionsHaveGone= new Semaphore(0);
         public static final Object waitingForBob = new Object();
         public static final Object waitingForDinnerToBeReady = new Object();
+        public static boolean isDinnerReady=false;
+        public static Semaphore DinnerTable=new Semaphore(5);
+        public static final Queue<NamedThread> Couch = new ArrayDeque<>(2);
+
         public static void WaitForBobForDinner(Thread T) {
             synchronized (waitingForBob){
                 if(T!= Main.bob){
@@ -96,22 +102,71 @@ public class Main {
             public static void WaitForDinnerToBeReady(Thread T) {
                 synchronized (waitingForDinnerToBeReady){
                         try {
+                            if(!isDinnerReady)
                             waitingForDinnerToBeReady.wait();
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
                     }
                 }
+
+                public static void GoReadABook(NamedThread T){
+                    synchronized (Couch) {
+                        if (Couch.isEmpty()) {
+                            System.out.println("Lights are turning on for " + T.name + " to read");
+                        }
+                        Couch.add(T);
+                        System.out.println(T.name+ " is reading on the couch");
+                    }
+                    try {
+                        Thread.sleep((long) (Math.random()*500));
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    synchronized (Couch) {
+                        Couch.remove(T);
+                        System.out.println(T.name+ " is done reading");
+                        if (Couch.isEmpty()) {
+                            System.out.println("Lights are turning off as " + T.name + " leaves");
+                        }
+
+                    }
+                }
+
+        public static void GetSomeDinner(NamedThread T) {
+            try {
+                DinnerTable.acquire();
+                System.out.println(T.name+" sitting down and eating dinner");
+                Thread.sleep((long) (Math.random()*500));
+                System.out.println(T.name+" done eating");
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            DinnerTable.release();
+        }
+
+        public static void GoToBed(NamedThread T) {
+            System.out.println(T.name+" going to bed");
+            try {
+                Thread.sleep((long) (Math.random()+40));
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            System.out.println(T.name+" falling asleep");
+        }
     }
 
-    static class Alice extends Thread {
+
+    static class Alice extends NamedThread {
         private static Gnome[] gnomes;
         private static Minion[] minions;
         private Bob bob;
         private final Semaphore doorToWaitBy;
         private List<Critter> critterList=new ArrayList<>();
 
+
         public Alice(Gnome[] gnomes, Minion[] minions, Bob bob) {
+            name="alice";
             Alice.gnomes =gnomes;
             Alice.minions =minions;
             this.bob = bob;
@@ -134,17 +189,27 @@ public class Main {
             waitByDoor();
             WaitForBobForDinner(this);
             prepareDinner();
+            GetSomeDinner(this);
+            GoReadABook(this);
         }
 
         private void prepareDinner() {
-            System.out.println("alice is preparing dinner");
-            synchronized (waitingForDinnerToBeReady){waitingForDinnerToBeReady.notifyAll();}
+            System.out.println("alice preparing dinner");
+            try {
+                Thread.sleep(200);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            synchronized (waitingForDinnerToBeReady){
+                isDinnerReady=true;
+                waitingForDinnerToBeReady.notifyAll();
+            }
         }
 
         private void wakeBobWhenMinionsAreGone() {
 
             try {
-                Coordination.MinionsHaveGone.acquire();
+                MinionsHaveGone.acquire();
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }

@@ -1,5 +1,7 @@
 package com.company;
 
+import java.util.concurrent.Semaphore;
+
 public class Gnome extends Critter implements Runnable {
 
     public static GroupByGroup groupByGroup = new GroupByGroup(false, Main.numGnomes, Main.Coordination.MinionsHaveGone::release);
@@ -11,6 +13,21 @@ public class Gnome extends Critter implements Runnable {
 
     public Gnome(String s, LineByDoor<Gnome> gnomeLineByDoor) {
         super(s, gnomeLineByDoor, "mines", groupByGroup, "go play outside");
+    }
+
+
+    public static Semaphore Bathroom = new Semaphore(1);
+    @Override
+    public void BeforeBed() {
+        try {
+            Bathroom.acquire();
+            System.out.println(name+" using the bathroom");
+            sleep((long) (Math.random()*90));
+            System.out.println(name+" done with the bathroom");
+            Bathroom.release();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override

@@ -10,7 +10,7 @@ public class Gnome extends Critter implements Runnable {
     //private LineByDoor<Gnome> lineByDoor;
 
     public Gnome(String s, LineByDoor<Gnome> gnomeLineByDoor) {
-        super(s, gnomeLineByDoor, "mines", groupByGroup);
+        super(s, gnomeLineByDoor, "mines", groupByGroup, "go play outside");
     }
 
     @Override

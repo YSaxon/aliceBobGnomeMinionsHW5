@@ -1,5 +1,8 @@
 package com.company;
 
+import static com.company.Main.Coordination.WaitForBobForDinner;
+import static com.company.Main.Coordination.waitingForBob;
+
 public abstract class Critter extends Thread{
 
 
@@ -11,12 +14,14 @@ public abstract class Critter extends Thread{
     public final GroupByGroup groupByGroup;
     private String workplace;
     public boolean readyForAliceInTheMorning;
+    public final String StuffTheyDoAfterComingHome;
 
-    public Critter(String name, LineByDoor lineByDoor, String workplace, GroupByGroup groupByGroup) {
+    public Critter(String name, LineByDoor lineByDoor, String workplace, GroupByGroup groupByGroup, String stuffTheyDoAfterComingHome) {
         this.name=name;
         this.lineByDoor = lineByDoor;
         this.workplace = workplace;
         this.groupByGroup = groupByGroup;
+        StuffTheyDoAfterComingHome = stuffTheyDoAfterComingHome;
     }
 
     @Override
@@ -32,6 +37,10 @@ public abstract class Critter extends Thread{
         }
         PartingWordsToAlice();
         LeaveForWork();
+        Work();
+        System.out.println(name+" done working");
+        ComeHome();
+        Main.Coordination.WaitForBobForDinner(this);
 
     }
 
@@ -49,10 +58,12 @@ public abstract class Critter extends Thread{
                 ()-> System.out.println(name+" is leaving")
         );
         //System.out.println(name+"is leaving through the door and going to work");
-        Work();
-        System.out.println(name+" done working");
-        ComeHome();
+
+
+
     }
+
+
 
 
     protected void Work(){
@@ -66,6 +77,7 @@ public abstract class Critter extends Thread{
 
     public void ComeHome() {
         lineByDoor.WaitInLineAtDoor(this);
+        System.out.println(name+" is going to go "+StuffTheyDoAfterComingHome);
     }
 
 }

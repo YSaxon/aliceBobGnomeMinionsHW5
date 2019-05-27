@@ -5,6 +5,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Semaphore;
 
+import static com.company.Main.Coordination.WaitForBobForDinner;
+import static com.company.Main.Coordination.waitingForDinnerToBeReady;
+
 public class Main {
 
     public static final int numMinions = 10;
@@ -13,7 +16,7 @@ public class Main {
     private static Minion[] minions;
     public static Alice alice;
     public static Object BobSleeping = new Object();
-    private static Bob bob;
+    public static Bob bob;
 
 
     public static void main(String[] args) {
@@ -42,7 +45,7 @@ public class Main {
     static class Bob extends Critter {
 
         public Bob(Object bobSleeping, Semaphore bobCanComeIn) {
-            super("\t\tbob", new LineByDoor<Bob>(1,bobCanComeIn,false), "accounting firm", new GroupByGroup(true,1,()-> {}));
+            super("\t\tbob", new LineByDoor<Bob>(1,bobCanComeIn,false), "accounting firm", new GroupByGroup(true,1,()-> {}), "do whatever he wants");
         }
 
         @Override
@@ -74,6 +77,31 @@ public class Main {
         public static volatile int GnomesLeft;
         public static volatile int MinionsLeft;
         public static Semaphore MinionsHaveGone= new Semaphore(0);
+        public static final Object waitingForBob = new Object();
+        public static final Object waitingForDinnerToBeReady = new Object();
+        public static void WaitForBobForDinner(Thread T) {
+            synchronized (waitingForBob){
+                if(T!= Main.bob){
+                    try {
+                        waitingForBob.wait();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+                else {
+                    waitingForBob.notifyAll();
+                }}}
+
+
+            public static void WaitForDinnerToBeReady(Thread T) {
+                synchronized (waitingForDinnerToBeReady){
+                        try {
+                            waitingForDinnerToBeReady.wait();
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
     }
 
     static class Alice extends Thread {
@@ -104,6 +132,13 @@ public class Main {
             makeLunchAndKissEachOne();
             wakeBobWhenMinionsAreGone();
             waitByDoor();
+            WaitForBobForDinner(this);
+            prepareDinner();
+        }
+
+        private void prepareDinner() {
+            System.out.println("alice is preparing dinner");
+            synchronized (waitingForDinnerToBeReady){waitingForDinnerToBeReady.notifyAll();}
         }
 
         private void wakeBobWhenMinionsAreGone() {

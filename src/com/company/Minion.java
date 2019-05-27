@@ -2,7 +2,8 @@ package com.company;
 
 public class Minion extends Critter {
 
-    public static GroupByGroup groupByGroup = new GroupByGroup(true,Main.numMinions,Gnome.groupByGroup::AllowGroupToGo);
+    public static GroupByGroup groupByGroup = new GroupByGroup(true, Main.numMinions, Gnome.groupByGroup::AllowGroupToGo);
+
     public Minion(String s, LineByDoor<Minion> lineByDoor) {
         super(s, lineByDoor, "deli", groupByGroup, "go play games");
     }
@@ -10,7 +11,7 @@ public class Minion extends Critter {
     @Override
     protected void PartingWordsToAlice() {
 
-            System.out.println(name + " says to alice \"Thank you alice\"");
+        System.out.println(name + " says to alice \"Thank you alice\"");
 
     }
 

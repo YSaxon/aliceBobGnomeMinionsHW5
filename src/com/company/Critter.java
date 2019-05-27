@@ -1,17 +1,17 @@
 package com.company;
 
-import static com.company.Main.Coordination.*;
+import static com.company.Main.Coordination.GetSomeDinner;
 
-public abstract class Critter extends NamedThread{
+public abstract class Critter extends NamedThread {
 
- protected LineByDoor<Critter> lineByDoor;
     public final GroupByGroup groupByGroup;
-    private String workplace;
-    public boolean readyForAliceInTheMorning;
     public final String StuffTheyDoAfterComingHome;
+    public boolean readyForAliceInTheMorning;
+    protected LineByDoor<Critter> lineByDoor;
+    private String workplace;
 
     public Critter(String name, LineByDoor lineByDoor, String workplace, GroupByGroup groupByGroup, String stuffTheyDoAfterComingHome) {
-        this.name=name;
+        this.name = name;
         this.lineByDoor = lineByDoor;
         this.workplace = workplace;
         this.groupByGroup = groupByGroup;
@@ -22,17 +22,17 @@ public abstract class Critter extends NamedThread{
     public void run() {
         super.run();
         try {
-            synchronized (this){
-                readyForAliceInTheMorning=true;
+            synchronized (this) {
+                readyForAliceInTheMorning = true;
                 wait();//wait for alice to make them lunch
             }
         } catch (InterruptedException e) {
-           e.printStackTrace();
+            e.printStackTrace();
         }
         PartingWordsToAlice();
         LeaveForWork();
         Work();
-        System.out.println(name+" done working");
+        System.out.println(name + " done working");
         ComeHome();
         Main.Coordination.WaitForBobForDinner(this);
         Main.Coordination.WaitForDinnerToBeReady(this);
@@ -49,21 +49,18 @@ public abstract class Critter extends NamedThread{
 
     public void LeaveForWork() {
         groupByGroup.GoSingleFileWhenLegal(
-                ()-> System.out.println(name+" is leaving")
+                () -> System.out.println(name + " is leaving")
         );
         //System.out.println(name+"is leaving through the door and going to work");
-
 
 
     }
 
 
-
-
-    protected void Work(){
+    protected void Work() {
         try {
-            System.out.println(name+" is working at the "+workplace);
-            this.sleep((long) (Math.random()*1000));
+            System.out.println(name + " is working at the " + workplace);
+            sleep((long) (Math.random() * 1000));
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -71,7 +68,7 @@ public abstract class Critter extends NamedThread{
 
     public void ComeHome() {
         lineByDoor.WaitInLineAtDoor(this);
-        System.out.println(name+" is going to go "+StuffTheyDoAfterComingHome);
+        System.out.println(name + " is going to go " + StuffTheyDoAfterComingHome);
     }
 
 }

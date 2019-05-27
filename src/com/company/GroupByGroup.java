@@ -2,9 +2,9 @@ package com.company;
 
 public class GroupByGroup {
 
+    final int GroupSize;
     boolean groupCanGo;
     volatile int HowManyHaveGoneThrough;
-    final int GroupSize;
     Runnable WhatToDoWhenGroupHasGoneThrough;
 
     public GroupByGroup(boolean groupCanGoFromStart, int groupSize, Runnable whatToDoWhenGroupHasGoneThrough) {
@@ -16,22 +16,23 @@ public class GroupByGroup {
 
     public void AllowGroupToGo() {
         synchronized (this) {
-            groupCanGo=true;
+            groupCanGo = true;
             notifyAll();
         }
     }
 
-    public void GoSingleFileWhenLegal(Runnable andDoStuff){
-        synchronized (this){
+    public void GoSingleFileWhenLegal(Runnable andDoStuff) {
+        synchronized (this) {
             if (!groupCanGo) {
                 try {
                     wait();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
-                }}
+                }
+            }
             andDoStuff.run();
             HowManyHaveGoneThrough++;
-            if(HowManyHaveGoneThrough==GroupSize){
+            if (HowManyHaveGoneThrough == GroupSize) {
                 WhatToDoWhenGroupHasGoneThrough.run();//maybe in a seperate thread?
             }
         }

@@ -47,15 +47,13 @@ public class Main {
 
         @Override
         public void run() {
-            //System.out.println("bob starting");
             try {
                 System.out.println("bob is sleeping");
-                sleep(9999999);
+                sleep(9999999);//you DID say bob should SLEEP!
             } catch (InterruptedException e) {
                 System.out.println("Bob has woken up");
             }
             super.run();
-            System.out.println("bob after super.run");
         }
 
         @Override
@@ -174,11 +172,6 @@ public class Main {
             critterList.addAll(Arrays.asList(gnomes));
         }
 
-//        public void knockOnDoor(Semaphore door) {
-//            System.out.println("door was knocked on and Alice is opening it");
-//            door.release();
-//        }
-
 
         @Override
         public void run() {
@@ -214,11 +207,6 @@ public class Main {
             }
             System.out.println("alice is waking bob up");
             bob.interrupt();
-//            try {
-            //sleep(10);//cheap workaround
-//            } catch (InterruptedException e) {
-//                e.printStackTrace();
-//            }
             makeLunchKissAndNotify(bob);
 
         }
@@ -247,11 +235,6 @@ public class Main {
         private void makeLunchKissAndNotify(Critter critter) {
             while (!critter.readyForAliceInTheMorning) ;
             synchronized (critter) {
-//                try {
-//                    wait();
-//                } catch (InterruptedException e) {
-//                    e.printStackTrace();
-//                }
 
                 System.out.println("alice making lunch for " + critter.name);
                 System.out.println("alice giving " + critter.name + " a kiss");
